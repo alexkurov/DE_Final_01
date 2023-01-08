@@ -1,7 +1,7 @@
--- Пункты задания "Разработать скрипты загрузки данных в 2-х режимах: Инициализирующий, Инкрементальный" и "организовать Сырой слой данных" противоречат друг другу в текущих условиях.
--- В rss нет возможности отфильтровать выдачу по периоду. Следовательно, мы всегда получаем полный response и последовательно его парсим
--- Мы могли бы делать запрос к каждому источнику, сохранять полученный response в сыром виде, чтобы потом его распарсить, но это выглядит не оптимально в текущих условиях
--- Поэтому по диазайну, полученный rss сразу передаётся в feedparser, а результат записывается в news
+-- РџСѓРЅРєС‚С‹ Р·Р°РґР°РЅРёСЏ "Р Р°Р·СЂР°Р±РѕС‚Р°С‚СЊ СЃРєСЂРёРїС‚С‹ Р·Р°РіСЂСѓР·РєРё РґР°РЅРЅС‹С… РІ 2-С… СЂРµР¶РёРјР°С…: РРЅРёС†РёР°Р»РёР·РёСЂСѓСЋС‰РёР№, РРЅРєСЂРµРјРµРЅС‚Р°Р»СЊРЅС‹Р№" Рё "РѕСЂРіР°РЅРёР·РѕРІР°С‚СЊ РЎС‹СЂРѕР№ СЃР»РѕР№ РґР°РЅРЅС‹С…" РїСЂРѕС‚РёРІРѕСЂРµС‡Р°С‚ РґСЂСѓРі РґСЂСѓРіСѓ РІ С‚РµРєСѓС‰РёС… СѓСЃР»РѕРІРёСЏС….
+-- Р’ rss РЅРµС‚ РІРѕР·РјРѕР¶РЅРѕСЃС‚Рё РѕС‚С„РёР»СЊС‚СЂРѕРІР°С‚СЊ РІС‹РґР°С‡Сѓ РїРѕ РїРµСЂРёРѕРґСѓ. РЎР»РµРґРѕРІР°С‚РµР»СЊРЅРѕ, РјС‹ РІСЃРµРіРґР° РїРѕР»СѓС‡Р°РµРј РїРѕР»РЅС‹Р№ response Рё РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕ РµРіРѕ РїР°СЂСЃРёРј
+-- РњС‹ РјРѕРіР»Рё Р±С‹ РґРµР»Р°С‚СЊ Р·Р°РїСЂРѕСЃ Рє РєР°Р¶РґРѕРјСѓ РёСЃС‚РѕС‡РЅРёРєСѓ, СЃРѕС…СЂР°РЅСЏС‚СЊ РїРѕР»СѓС‡РµРЅРЅС‹Р№ response РІ СЃС‹СЂРѕРј РІРёРґРµ, С‡С‚РѕР±С‹ РїРѕС‚РѕРј РµРіРѕ СЂР°СЃРїР°СЂСЃРёС‚СЊ, РЅРѕ СЌС‚Рѕ РІС‹РіР»СЏРґРёС‚ РЅРµ РѕРїС‚РёРјР°Р»СЊРЅРѕ РІ С‚РµРєСѓС‰РёС… СѓСЃР»РѕРІРёСЏС…
+-- РџРѕСЌС‚РѕРјСѓ РїРѕ РґРёР°Р·Р°Р№РЅСѓ, РїРѕР»СѓС‡РµРЅРЅС‹Р№ rss СЃСЂР°Р·Сѓ РїРµСЂРµРґР°С‘С‚СЃСЏ РІ feedparser, Р° СЂРµР·СѓР»СЊС‚Р°С‚ Р·Р°РїРёСЃС‹РІР°РµС‚СЃСЏ РІ news
 
 create table if not exists news ( 
   item_id int generated always as identity primary key,
@@ -20,27 +20,34 @@ create table if not exists sources (
   source_name varchar
 );
 
--- Категории. categ_group_id заполняется пользователем для более корректной аггрегации данных в отчётах
--- Возможно имеет смысл ввести parent_categ_id, однако решено пока не усложнять
+-- РљР°С‚РµРіРѕСЂРёРё. categ_group_id Р·Р°РїРѕР»РЅСЏРµС‚СЃСЏ РїРѕР»СЊР·РѕРІР°С‚РµР»РµРј РґР»СЏ Р±РѕР»РµРµ РєРѕСЂСЂРµРєС‚РЅРѕР№ Р°РіРіСЂРµРіР°С†РёРё РґР°РЅРЅС‹С… РІ РѕС‚С‡С‘С‚Р°С…
+-- Р’РѕР·РјРѕР¶РЅРѕ РёРјРµРµС‚ СЃРјС‹СЃР» РІРІРµСЃС‚Рё parent_categ_id, РѕРґРЅР°РєРѕ СЂРµС€РµРЅРѕ РїРѕРєР° РЅРµ СѓСЃР»РѕР¶РЅСЏС‚СЊ
 create table if not exists categories (
   categ_id int generated always as identity primary key,  
   categ_group_id int,
   categ_name varchar
 );
 
--- Группы категорий
+-- Р“СЂСѓРїРїС‹ РєР°С‚РµРіРѕСЂРёР№
 create table if not exists category_groups (
   categ_group_id int generated always as identity primary key,  
   categ_group_name varchar
 );
 
--- Авторы
+-- РђРІС‚РѕСЂС‹. РќРµ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ
 create table if not exists authors (
   author_id int generated always as identity primary key,  
   author_name varchar
 );
 
--- Заглушка витрины. Обновляется в коде по мере появления новых источников
+create index news_source_id on news(source_id);
+create index news_categ_id on news(categ_id);
+create index news_author_id on news(author_id);
+create index news_item_url on news(item_url);
+create index news_item_date on news(item_date);
+create index categories_categ_group_id on categories(categ_group_id);
+
+-- Р—Р°РіР»СѓС€РєР° РІРёС‚СЂРёРЅС‹. РћР±РЅРѕРІР»СЏРµС‚СЃСЏ РІ РєРѕРґРµ РїРѕ РјРµСЂРµ РїРѕСЏРІР»РµРЅРёСЏ РЅРѕРІС‹С… РёСЃС‚РѕС‡РЅРёРєРѕРІ
 create materialized view categories_summary_view as(
 with counts as(
 	select 
@@ -56,7 +63,7 @@ with counts as(
 	group by coalesce(cg.categ_group_name, c.categ_name)),
 	
 max_day as(
-	-- возвращаем максимальную дату, если есть несколько дат с одинаковым максимальным количеством новостей
+	-- РІРѕР·РІСЂР°С‰Р°РµРј РјР°РєСЃРёРјР°Р»СЊРЅСѓСЋ РґР°С‚Сѓ, РµСЃР»Рё РµСЃС‚СЊ РЅРµСЃРєРѕР»СЊРєРѕ РґР°С‚ СЃ РѕРґРёРЅР°РєРѕРІС‹Рј РјР°РєСЃРёРјР°Р»СЊРЅС‹Рј РєРѕР»РёС‡РµСЃС‚РІРѕРј РЅРѕРІРѕСЃС‚РµР№
 	select categ_name, max(item_date) max_date
 	from
 		(select md.*, max(total_count) over(partition by categ_name) max_total_count
@@ -90,4 +97,4 @@ week_days as(
 select c.*, md.max_date, wd.mon_count, wd.tue_count, wd.wed_count, wd.thu_count, wd.fri_count, wd.sat_count, wd.sun_count
 from counts c
 left join max_day md on c.categ_name = md.categ_name
-left join week_days wd on c.categ_name = wd.categ_name)
+left join week_days wd on c.categ_name = wd.categ_name);
