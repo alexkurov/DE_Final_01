@@ -17,8 +17,8 @@
 
 ### Доступ к витрине данных
 
-  Витрина реализована посредством PostgresSQL Materialized View
-  Можно использовать контейнер pgAdmin http://localhost:5050/
+  Витрина реализована посредством PostgresSQL Materialized View.
+  Для доступа можно использовать контейнер pgAdmin http://localhost:5050/
   * `hostname`: `db`
   * `port`    : `5432`
   * `username`: `admin`
