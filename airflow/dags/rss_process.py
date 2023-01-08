@@ -231,8 +231,7 @@ def process_data():
     pass
 
 
-with DAG(dag_id="rss_process", start_date=datetime(2023, 1, 1), catchup=False,
-         schedule_interval="0 0 * * *") as dag:
+with DAG(dag_id="rss_process", start_date=datetime(2023, 1, 1), catchup=False, schedule_interval="*/5 * * * *") as dag:
 
     # получаем список ссылок
     sources = Variable.get("sources")
@@ -250,17 +249,15 @@ with DAG(dag_id="rss_process", start_date=datetime(2023, 1, 1), catchup=False,
     # первичная очистка данных
     clear_op = PythonOperator(task_id="clear_and_prepare", python_callable=clear_data, do_xcom_push=False)
 
-    # процессинг данных
-    # process_op = PythonOperator(task_id="process", python_callable=process_data, do_xcom_push=False)
-
+    # проверка актуальности витрины
     check_mart_exists_op = BranchPythonOperator(task_id='check_mart_exists', python_callable=check_mart_exists, do_xcom_push=False)
-
+    
+    # если появились новые источники новостей, то пересоздаём витрину
     recreate_mart_op = PythonOperator(task_id="recreate_mart", python_callable=recreate_mart, do_xcom_push=False)
     do_nothing_op = PythonOperator(task_id="do_nothing", python_callable=do_nothing, do_xcom_push=False)
 
-    # подготовка витрин
+    # обновление витрины
     refresh_mart_op = PythonOperator(task_id="refresh_mart", python_callable=refresh_mart, trigger_rule=TriggerRule.NONE_FAILED_MIN_ONE_SUCCESS, do_xcom_push=False)
-    
-    
+        
 
     download_op >> clear_op >> check_mart_exists_op >> [recreate_mart_op, do_nothing_op] >> refresh_mart_op
